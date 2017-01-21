@@ -1,0 +1,193 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>dashboard</title>
+
+    <link href="/assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/assets/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="/assets/css/epoch.min.css" rel="stylesheet">
+</head>
+<body>
+
+<div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <button type="button" class="btn btn-navbar" data-toggle="collapse"
+                    data-target=".nav-collapse">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+
+            <a class="brand" href="/">Dashboard</a>
+
+            <div class="nav-collapse collapse">
+                <ul class="nav">
+                    <li class="">
+                        <a href="/">Home</a>
+                    </li>
+                    <li class="">
+                        <a href="/install">Installation</a>
+                    </li>
+                    <li class="">
+                        <a href="/architecture">Architecture</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="span2"></div>
+
+            <div class="span8">
+                <div id="graph" class="epoch"></div>
+                <div class="message"></div>
+            </div>
+
+            <div class="span2"></div>
+        </div>
+    </div>
+</div>
+
+</body>
+
+<style>
+    #graph {
+        width: 100%;
+        height: 400px;
+        border: none;
+        margin-top: 60px;
+    }
+
+    .message {
+        color: darkred;
+        font: 14px "Helvetica Neue", helvetica, arial, sans-serif;
+    }
+</style>
+
+<script type="text/javascript" src="/assets/js/jquery.min.js"></script>
+<script type="text/javascript" src="/assets/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="/assets/js/d3.min.js"></script>
+<script type="text/javascript" src="/assets/js/epoch.min.js"></script>
+
+<script>
+    $(function () {
+        var delay = 5000;
+        var now = parseInt(new Date().getTime() / 1000);
+
+        // default value
+        var def = {time: now, y: 0};
+
+        // epoch data definition
+        var data = [
+            {
+                label: 'africa',
+                values: []
+            },
+            {
+                label: 'north_america',
+                values: []
+            },
+            {
+                label: 'asia',
+                values: []
+            },
+            {
+                label: 'oceania',
+                values: []
+            },
+            {
+                label: 'europe',
+                values: []
+            },
+            {
+                label: 'south_america',
+                values: []
+            }
+        ];
+
+        // epoch meta data
+        var meta_data = {
+            type: 'time.area',
+            data: data,
+            axes: ['left', 'right', 'bottom'],
+            windowSize: 10,
+            time: {time: 10, right: 5, left: 5},
+            historySize: 240
+        };
+
+        // create epoch graph
+        var graph = $('#graph').epoch(meta_data);
+
+        var start = 0;
+        var end = 0;
+
+        function receive() {
+            // use ajax to pull database records
+            var meta = {
+                url: "/metrics",
+                timeout: delay,
+                async: false,
+                data: {start: start, end: end, delay: delay}
+            };
+
+            $.ajax(meta).done(push);
+        }
+
+        function push(results) {
+            if (typeof results.lastTime === "undefined") {
+                return;
+            }
+
+            if (start == 0) {
+                start = results.lastTime;
+            } else {
+                start = end;
+            }
+
+            if (typeof results.metrics === "undefined") {
+                return;
+            }
+
+            end = start + delay;
+
+            var new_data = [];
+
+            for (var i = 0; i < data.length; i++) {
+                for (var j = 0; j < results.metrics.length; j++) {
+                    if (results.metrics[j].market == data[i].label) {
+                        // add new record to element group
+                        // each element is specific market data
+                        new_data[j] = {
+                            time: results.metrics[j].date,
+                            y: results.metrics[j].rate
+                        };
+                    }
+                }
+
+                // use default data if one of markets is missing
+                // just for test data
+                if (typeof new_data[i] == "undefined") {
+                    new_data[i] = def;
+                    new_data[i].time = parseInt(start / 1000);
+                }
+            }
+
+            // send records to graph
+            graph.push(new_data);
+        }
+
+        // runs receive method each {delay} milliseconds
+        setInterval(receive, delay);
+
+        // first execution
+        receive();
+    });
+</script>
+</html>
