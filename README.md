@@ -25,6 +25,20 @@ after you need to use Maven for creating uber jar files,
 $ mvn clean package -DskipTests
 ```
 
+and finally create MySQL database and table,
+
+```sql
+CREATE DATABASE IF NOT EXISTS dashboard_test;
+
+CREATE TABLE IF NOT EXISTS events (
+ market VARCHAR(24) NOT NULL DEFAULT '',
+ rate FLOAT DEFAULT NULL,
+ dt DATETIME NOT NULL,
+ PRIMARY KEY (market, dt)
+)
+ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+```
+
 ### Usage
 
 1 - Start the Spark streaming service and it'll process events from Kafka topic to MySQL,
