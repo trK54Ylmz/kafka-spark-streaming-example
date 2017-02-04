@@ -25,10 +25,31 @@ after you need to use Maven for creating uber jar files,
 $ mvn clean package -DskipTests
 ```
 
+until that moment we had created jar files and now we'll install Kafka and MySQL,
+
+```bash
+$ wget http://www-us.apache.org/dist/kafka/0.10.1.0/kafka_2.11-0.10.1.0.tgz
+$ # or wget http://www-eu.apache.org/dist/kafka/0.10.1.0/kafka_2.11-0.10.1.0.tgz
+$ tar -xf kafka_2.11-0.10.1.0.tgz
+$ cd kafka_2.11-0.10.1.0
+$ nohup ./bin/zookeeper-server-start.sh ./config/zookeeper.properties > /tmp/kafka-zookeeper.out 2>&1 &
+$ nohup ./bin/kafka-server-start.sh ./config/server.properties > /tmp/kafka-server.out 2>&1 &
+```
+
+Kafka is ready we can continue to install MySQL,
+
+```bash
+$ sudo apt-get install mysql-server # for Ubuntu, Debian
+$ sudo yum install mysql-server && sudo systemctl start mysqld # for CentOS, RHEL
+$ brew install mysql && mysql.server restart # for macOS
+```
+
 and finally create MySQL database and table,
 
 ```sql
 CREATE DATABASE IF NOT EXISTS dashboard_test;
+
+USE dashboard_test;
 
 CREATE TABLE IF NOT EXISTS events (
  market VARCHAR(24) NOT NULL DEFAULT '',
