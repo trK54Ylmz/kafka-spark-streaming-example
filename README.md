@@ -1,5 +1,7 @@
 # kafka &middot; spark streaming example
 
+[![Build Status](https://travis-ci.org/trK54Ylmz/kafka-spark-streaming-example.svg?branch=master)](https://travis-ci.org/trK54Ylmz/kafka-spark-streaming-example)
+
 This is a simple dashboard example on Kafka and Spark Streaming
 
 ### Prerequisites
