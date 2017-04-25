@@ -80,7 +80,7 @@ $ java -Dconfig=./config/common.conf -jar producer/target/kafka-producer-0.1.jar
 3 - Start the web server so you can see the dashboard
 
 ```bash
-$ java -Dconfig=./config/common.conf -jar producer/target/web-0.1.jar
+$ java -Dconfig=./config/common.conf -jar web/target/web-0.1.jar
 ```
 
 4 - If everything look fine, please enter the dashboard address,
